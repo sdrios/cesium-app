@@ -12,10 +12,10 @@
     }
   },
   {
-    "id": "Facility/AGI",
-    "name": "AGI",
+    "id": "Facility/Target",
+    "name": "Target",
     "availability": "2012-03-15T10:00:00Z/2012-03-16T10:00:00Z",
-    "description": "<!--HTML-->\r\n<p>\r\nAnalytical Graphics, Inc. (AGI) develops commercial modeling and analysis software used by more than 40,000 global space, defense and intelligence professionals. AGI founded Cesium to meet the need for a cross-platform virtual globe with dynamic-data visualization. AGI continues to invest heavily in Cesium's development and facilitate the growth of the user and contributor community.\r\n</p>",
+    "description": "<!--HTML-->\r\n<p>\r\nSample Target\r\n</p>",
     "billboard": {
       "eyeOffset": {
         "cartesian": [
@@ -64,7 +64,7 @@
       },
       "show": true,
       "style": "FILL_AND_OUTLINE",
-      "text": "AGI",
+      "text": "Target",
       "verticalOrigin": "CENTER"
     },
     "position": {

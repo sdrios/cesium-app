@@ -11,8 +11,13 @@ import {
   IonResource,
   Viewer,
   viewerCesiumNavigationMixin,
+  Color,
+  ColorMaterialProperty,
+  PositionPropertyArray,
+  ReferenceProperty,
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
+import "regenerator-runtime/runtime";
 
 export default {
   name: "Map",
@@ -21,22 +26,60 @@ export default {
       terrainProvider: createWorldTerrain(),
     });
 
-    // var tileset = new Cesium3DTileset({
-    //   url: IonResource.fromAssetId(40866),
-    // });
-    //viewer.scene.primitives.add(tileset);
-    //viewer.zoomTo(tileset);
+    const loadData = async () => {
+      let satellite = await viewer.dataSources.add(
+        new CzmlDataSource.load("../data/ISS.czml")
+      );
+      let target = await viewer.dataSources.add(
+        new CzmlDataSource.load("../data/targets.czml")
+      );
+      return { satellite: satellite, target: target };
+    };
 
-    let satelliteSource = new CzmlDataSource.load("../data/ISS.czml").then(
-      (source) => {
-        console.log("SATELLITE ENTITY", source.entities.getById("Satellite/ISS"));
-        viewer.dataSources.add(source);
-        //viewer.trackedEntity = source.entities.getById("Satellite/ISS");
-      }
-    );
+    loadData().then((data) => {
+      console.log(data);
+      let satelliteEntities = data.satellite.entities;
+      let satelliteEntity = satelliteEntities.getById("Satellite/ISS");
+      let satellitePosition = satelliteEntity.position;
+      let targetEntities = data.target.entities;
+      let targetEntity = targetEntities.getById("Facility/Target");
+      let targetPosition = targetEntity.position;
+      console.log(satellitePosition);
+      console.log(targetPosition);
 
-    let targetSource = new CzmlDataSource.load("../data/targets.czml");
-    viewer.dataSources.add(targetSource);
+      //add polyline target tracking
+      viewer.entities.add({
+        polyline: {
+          followSurface: false,
+          positions: new PositionPropertyArray([
+            new ReferenceProperty(satelliteEntities, "Satellite/ISS", [
+              "position",
+            ]),
+            new ReferenceProperty(targetEntities, "Facility/Target", [
+              "position",
+            ]),
+          ]),
+          material: new ColorMaterialProperty(Color.YELLOW.withAlpha(0.25)),
+        },
+      });
+    });
+
+    // let satelliteSource = new CzmlDataSource.load("../data/ISS.czml").then(
+    //   (source) => {
+    //     viewer.dataSources.add(source);
+    //     let satelliteEntity = source.entities.getById("Satellite/ISS");
+    //     console.log("SATELLITE ENTITY", satelliteEntity);
+    //     //viewer.trackedEntity = source.entities.getById("Satellite/ISS");
+    //   }
+    // );
+    // let targetSource = new CzmlDataSource.load("../data/targets.czml").then(
+    //   (source) => {
+    //     viewer.dataSources.add(source);
+    //     let targetEntity = source.entities.getById("Facility/Target");
+    //     console.log("TARGET ENTITY", satelliteEntity);
+    //     let targetPosition = targetEntity.position;
+    //   }
+    // );
   },
 };
 </script>
