@@ -3,7 +3,9 @@
 </template>
 
 <script>
+//define cesium path
 window.CESIUM_BASE_URL = "/Cesium/";
+//import cesium objects
 import {
   CzmlDataSource,
   Cesium3DTileset,
@@ -15,17 +17,21 @@ import {
   ColorMaterialProperty,
   PositionPropertyArray,
   ReferenceProperty,
+  Cartesian3,
+  CallbackProperty,
 } from "cesium";
-import "cesium/Build/Cesium/Widgets/widgets.css";
-import "regenerator-runtime/runtime";
+import "cesium/Build/Cesium/Widgets/widgets.css"; //cesium CSS
+import "regenerator-runtime/runtime"; //enable use of async
 
 export default {
   name: "Map",
+  //set up viewer once component has mounted
   mounted: () => {
     const viewer = new Viewer("cesiumContainer", {
       terrainProvider: createWorldTerrain(),
     });
 
+    //async function to load all CZML data
     const loadData = async () => {
       let satellite = await viewer.dataSources.add(
         new CzmlDataSource.load("../data/ISS.czml")
@@ -36,6 +42,7 @@ export default {
       return { satellite: satellite, target: target };
     };
 
+    //handle map functionality once data has loaded
     loadData().then((data) => {
       console.log(data);
       let satelliteEntities = data.satellite.entities;
@@ -51,6 +58,13 @@ export default {
       viewer.entities.add({
         polyline: {
           followSurface: false,
+          //FEATURE IN PROGRESS - conditionally show polyline if satellite is within certain distance of target
+          // show: new CallbackProperty(()=>{
+          //create buffer of certain distance around target point
+          //check satellite position at given time
+          //if satellite position overlaps target buffer, show polyline - return true
+          //else hide polyline - return false
+          // }),
           positions: new PositionPropertyArray([
             new ReferenceProperty(satelliteEntities, "Satellite/ISS", [
               "position",
@@ -62,24 +76,10 @@ export default {
           material: new ColorMaterialProperty(Color.YELLOW.withAlpha(0.25)),
         },
       });
-    });
 
-    // let satelliteSource = new CzmlDataSource.load("../data/ISS.czml").then(
-    //   (source) => {
-    //     viewer.dataSources.add(source);
-    //     let satelliteEntity = source.entities.getById("Satellite/ISS");
-    //     console.log("SATELLITE ENTITY", satelliteEntity);
-    //     //viewer.trackedEntity = source.entities.getById("Satellite/ISS");
-    //   }
-    // );
-    // let targetSource = new CzmlDataSource.load("../data/targets.czml").then(
-    //   (source) => {
-    //     viewer.dataSources.add(source);
-    //     let targetEntity = source.entities.getById("Facility/Target");
-    //     console.log("TARGET ENTITY", satelliteEntity);
-    //     let targetPosition = targetEntity.position;
-    //   }
-    // );
+      //viewer.trackedEntity = satelliteEntity; //track satellite entity
+      // viewer.zoomTo(viewer.entities); //set viewer extent to both entities (only works if satellite entity is not tracked)
+    });
   },
 };
 </script>
